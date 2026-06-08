@@ -1,0 +1,71 @@
+import matplotlib.pyplot as plt
+
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import (
+    accuracy_score,
+    confusion_matrix,
+    ConfusionMatrixDisplay,
+    classification_report
+)
+
+iris = load_iris()
+
+X = iris.data
+y = iris.target
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42
+)
+
+dt_model = DecisionTreeClassifier(random_state=42)
+dt_model.fit(X_train, y_train)
+dt_predictions = dt_model.predict(X_test)
+
+rf_model = RandomForestClassifier(
+    n_estimators=100,
+    random_state=42
+)
+rf_model.fit(X_train, y_train)
+rf_predictions = rf_model.predict(X_test)
+
+dt_accuracy = accuracy_score(y_test, dt_predictions)
+rf_accuracy = accuracy_score(y_test, rf_predictions)
+
+print("=" * 50)
+print("MODEL PERFORMANCE")
+print("=" * 50)
+print(f"Decision Tree Accuracy : {dt_accuracy:.2%}")
+print(f"Random Forest Accuracy : {rf_accuracy:.2%}")
+
+print("\nRandom Forest Classification Report")
+print(classification_report(y_test, rf_predictions))
+
+cm = confusion_matrix(y_test, rf_predictions)
+
+disp = ConfusionMatrixDisplay(
+    confusion_matrix=cm,
+    display_labels=iris.target_names
+)
+
+disp.plot()
+plt.title("Random Forest Confusion Matrix")
+plt.show()
+
+models = ["Decision Tree", "Random Forest"]
+accuracies = [dt_accuracy * 100, rf_accuracy * 100]
+
+plt.figure(figsize=(6, 4))
+plt.bar(models, accuracies)
+plt.ylabel("Accuracy (%)")
+plt.title("Model Accuracy Comparison")
+
+for i, value in enumerate(accuracies):
+    plt.text(i, value + 0.5, f"{value:.1f}%")
+
+plt.show()
